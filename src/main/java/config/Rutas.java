@@ -2,10 +2,9 @@ package config;
 
 
 import controller.login;
-import io.javalin.config.RouterConfig;
 import io.javalin.config.RoutesConfig;
 
-public class lo {
+public class Rutas {
 
     public static void registrar (RoutesConfig routes) {
 
@@ -14,8 +13,7 @@ public class lo {
         routes.get("/dashboard", ctx -> {ctx.render("/dashboard.html");});
 
         routes.post("/login", login::loginController);
-
-
+        routes.post("/cerrarSession",login::CerrarSession);
     }
 
 

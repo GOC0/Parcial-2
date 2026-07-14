@@ -1,22 +1,24 @@
-package database;
+package Database;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
+import org.h2.tools.Server;
 
 import java.sql.SQLException;
-import org.h2.tools.Server;
 
 public class Conexion {
 
     private static final EntityManagerFactory emf =
-            Persistence.createEntityManagerFactory("MiUnidadPersistencia");
+            Persistence.createEntityManagerFactory("MiPARCIAL2");
 
     public static EntityManager getEntityManager() {
         return emf.createEntityManager();
     }
 
-    public void startDb() {
+
+    // para abrir h2 en modo servidor
+    public static void startDb() {
         try {
             //Modo servidor H2.
             Server.createTcpServer("-tcpPort",
