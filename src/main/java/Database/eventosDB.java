@@ -4,9 +4,9 @@ package Database;
 import jakarta.persistence.EntityManager;
 import logic.Eventos;
 
+import java.util.List;
+
 public class eventosDB {
-
-
 
     //para guardar eventos
     public static  void guardarEv(Eventos  eventos){
@@ -23,18 +23,58 @@ public class eventosDB {
 
 
     //para buscar un evento
-    public static Eventos  buscarEventps(Eventos  eventos){
+    public static Eventos  buscarEventos(String nombre){
+            EntityManager em = Conexion.getEntityManager();
+            try {
+                List<Eventos> resultados = em.createQuery(
+                                "SELECT e FROM Eventos e WHERE e.nombre = :nombre",
+                                Eventos.class)
+                        .setParameter("nombre", nombre)
+                        .setMaxResults(1)
+                        .getResultList();
 
+                return resultados.isEmpty() ? null : resultados.get(0);
+
+            } finally {
+                em.close();
+            }
     }
 
 
     //para buscar la lista de todos los eventos
+    public List<Eventos> buscarTodoslosEventos() {
 
+        EntityManager em = Conexion.getEntityManager();
 
+        try {
+            return em.createQuery(
+                    "SELECT DISTINCT e FROM Eventos",
+                    Eventos.class
+            ).getResultList();
 
+        } finally {
+            em.close();
+        }
+    }
 
-    //para eliminar eventios
-    public static void EliminarEv(String nombre){
+public static void actualizarEv(Eventos  eventos){
+        EntityManager em = Conexion.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.merge(eventos);
+            em.getTransaction().commit();
+        }catch(Exception e){
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        }finally {
+            em.close();
+        }
+}
+
+    //para eliminar eventos
+    public static void eliminarEv(String nombre){
         EntityManager em= Conexion.getEntityManager();
         em.getTransaction().begin();
 

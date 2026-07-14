@@ -7,6 +7,26 @@ import java.util.List;
 
 public class UsuarioDB {
 
+    public static void crearU (Usuario usuario){
+        EntityManager em = Conexion.getEntityManager();
+        try{
+            em.getTransaction().begin();
+            em.persist(usuario);
+            em.getTransaction().commit();
+        }catch(Exception ex){
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+        }finally {
+            em.close();
+        }
+
+    }
+
+    public static void eliminarU (Usuario usuario){
+
+    }
+
     public static Usuario buscarUsuario(String usuario) {
         EntityManager em = Conexion.getEntityManager();
         try {
@@ -19,6 +39,21 @@ public class UsuarioDB {
 
             return resultados.isEmpty() ? null : resultados.get(0);
 
+        } finally {
+            em.close();
+        }
+    }
+    public static void actualizarUsuario(Usuario usuario) {
+        EntityManager em = Conexion.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.merge(usuario);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException(e);
         } finally {
             em.close();
         }

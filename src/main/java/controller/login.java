@@ -23,10 +23,12 @@ public class login {
             }else{
                 ctx.status(400);
                 ctx.redirect("/login.html");
+                return;
             }
         }else{
             ctx.status(400);
             ctx.redirect("/login.html");
+            return;
         }
     }
 
