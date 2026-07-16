@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Eventos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Raleway:wght@400;700&family=Anonymous+Pro&family=Satisfy&family=Zilla+Slab&display=swap");
+
+        /* ================= VARIABLES ================= */
+
+        letra-magica {
+            display: inline-block;
+            transition: transform 0.15s ease-out, text-shadow 0.15s ease-out, color 0.15s ease-out;
+            /* Evita que los saltos de línea se rompan */
+            white-space: pre-wrap;
+        }
+
+        .letra-magica:hover {
+            color: #fff;
+            /* Crece visualmente y sube un poquito */
+            transform: scale(1.25) translateY(-2px);
+            /* neón cyan */
+            text-shadow:
+                    0 0 5px #fff,
+                    0 0 10px #03e9f4,
+                    0 0 20px #03e9f4;
+            /* Asegura que la letra que toco quede por encima de las demás */
+            position: relative;
+            z-index: 10;
+        }
+        :root {
+            --bg-dark: #121215;
+            --primary: #03e9f4;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0; font-family: "Inter", sans-serif;
+            background: #0a0a0a; color: #fff; overflow-x: hidden;
+            transition: var(--transition);
+        }
+
+        /* ================= AMBIENTACIÓN (CIELO ESTRELLADO, COMETA Y LUNA) ================= */
+        .room-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at 50% 20%, #1a1a24 0%, #050801 80%);
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        /* Capa 1: Estrellas pequeñas */
+        .room-bg::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                    radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+                    radial-gradient(1px 1px at 40px 70px, #ffffff, rgba(0,0,0,0)),
+                    radial-gradient(1px 1px at 50px 160px, #dddddd, rgba(0,0,0,0)),
+                    radial-gradient(1px 1px at 90px 40px, #ffffff, rgba(0,0,0,0)),
+                    radial-gradient(1px 1px at 130px 80px, #ffffff, rgba(0,0,0,0)),
+                    radial-gradient(1px 1px at 160px 120px, #eeeeee, rgba(0,0,0,0));
+            background-repeat: repeat; background-size: 200px 200px;
+            animation: twinkle1 4s ease-in-out infinite, drift1 60s linear infinite;
+        }
+
+        /* Capa 2: Estrellas medianas */
+        .room-bg::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                    radial-gradient(1.5px 1.5px at 10px 10px, #ffffff, rgba(0,0,0,0)),
+                    radial-gradient(1.5px 1.5px at 150px 150px, #eeeeee, rgba(0,0,0,0)),
+                    radial-gradient(1.5px 1.5px at 60px 170px, #ffffff, rgba(0,0,0,0)),
+                    radial-gradient(1.5px 1.5px at 175px 30px, #dddddd, rgba(0,0,0,0)),
+                    radial-gradient(2px 2px at 100px 100px, #ffffff, rgba(0,0,0,0));
+            background-repeat: repeat; background-size: 250px 250px;
+            animation: twinkle2 5s ease-in-out infinite 2s, drift2 40s linear infinite;
+        }
+
+        /* Cometa */
+        .cometa {
+            position: absolute; top: 10%; left: -20%; width: 150px; height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), #ffffff);
+            border-radius: 2px; filter: drop-shadow(0 0 5px #ffffff);
+            animation: shootingStar 12s linear infinite; opacity: 0; z-index: -1;
+        }
+        .cometa::before {
+            content: ''; position: absolute; top: 50%; right: 0; transform: translateY(-50%);
+            width: 5px; height: 5px; background: #fff; border-radius: 50%;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8), 0 0 20px 4px #03e9f4;
+        }
+
+        /* Luna Realista Animada */
+        .moon {
+            position: fixed; top: 40px; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 120px; border-radius: 50%; background: #e0e0e0;
+            z-index: -1; overflow: hidden;
+            animation: moonBaseAnimation 3.2s linear infinite alternate;
+        }
+        .moon::before {
+            content: ""; position: absolute; width: 100%; height: 100%; border-radius: inherit;
+            background-image:
+                    radial-gradient(circle at 20% 30%, rgba(128,128,128,0.5) 5%, transparent 6%),
+                    radial-gradient(circle at 60% 60%, rgba(128,128,128,0.4) 8%, transparent 9%),
+                    radial-gradient(circle at 80% 20%, rgba(128,128,128,0.6) 3%, transparent 4%),
+                    radial-gradient(circle at 40% 70%, rgba(128,128,128,0.3) 12%, transparent 13%),
+                    radial-gradient(circle at 75% 85%, rgba(128,128,128,0.4) 6%, transparent 7%),
+                    radial-gradient(circle at 15% 75%, rgba(128,128,128,0.5) 10%, transparent 11%),
+                    radial-gradient(circle at 50% 10%, rgba(128,128,128,0.4) 9%, transparent 10%);
+            filter: blur(1.5px);
+            animation: moonCraterPhases 3.2s linear infinite alternate;
+        }
+        .moon::after {
+            content: ""; position: absolute; width: 100%; height: 100%; border-radius: inherit;
+            background: linear-gradient(-135deg, rgba(255,255,255,0.8), transparent 70%);
+            filter: blur(5px);
+            animation: moonLightCrescent 3.2s linear infinite alternate;
+        }
+
+        /* === KEYFRAMES DE TODA LA ANIMACIÓN === */
+        @keyframes twinkle1 {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            20% { opacity: 0.8; } 30% { opacity: 0.3; }
+            50% { opacity: 1; transform: scale(1); }
+            70% { opacity: 0.2; } 80% { opacity: 0.9; }
+        }
+        @keyframes twinkle2 {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            15% { opacity: 0.5; } 40% { opacity: 1; transform: scale(1.1); }
+            60% { opacity: 0.4; } 85% { opacity: 0.8; }
+        }
+        @keyframes drift1 { from { background-position: 0 0; } to { background-position: -200px 200px; } }
+        @keyframes drift2 { from { background-position: 0 0; } to { background-position: -250px 250px; } }
+        @keyframes shootingStar {
+            0% { transform: translateX(0) translateY(0) rotate(25deg); opacity: 0; }
+            3% { opacity: 1; }
+            15% { transform: translateX(120vw) translateY(60vh) rotate(25deg); opacity: 0; }
+            100% { transform: translateX(120vw) translateY(60vh) rotate(25deg); opacity: 0; }
+        }
+        @keyframes moonBaseAnimation {
+            0% {
+                transform: translateX(calc(-50% + 10px)) scale(0.95);
+                box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.1), inset 0 0 30px 10px rgba(0,0,0,0.7), inset 15px 15px 30px 5px rgba(0,0,0,0.5), inset -5px -5px 15px 2px rgba(255,255,255,0.05);
+            }
+            100% {
+                transform: translateX(calc(-50% - 10px)) scale(1);
+                box-shadow: 0 0 50px 8px rgba(255, 255, 255, 0.4), inset 0 0 20px 5px rgba(0,0,0,0.3), inset 10px 10px 20px 2px rgba(0,0,0,0.1), inset -2px -2px 10px 1px rgba(255,255,255,0.1);
+            }
+        }
+        @keyframes moonCraterPhases { 0% { opacity: 0.2; } 100% { opacity: 0.7; } }
+        @keyframes moonLightCrescent {
+            0% { transform: scale(0.8) translate(30px, -30px); opacity: 0.5; }
+            100% { transform: scale(1.1) translate(0, 0); opacity: 1; }
+        }
+        /* ================= SIDEBAR ================= */
+        .sidebar {
+            position: fixed; top: 0; left: 0; height: 100%; width: 250px;
+            background: rgba(18, 18, 21, 0.95); border-right: 1px solid #333;
+            color: #fff; backdrop-filter: blur(10px);
+            transition: width 0.3s ease; box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; justify-content: space-between; z-index: 100;
+        }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar .header { display: flex; align-items: center; padding: 20px; gap: 12px; }
+        .sidebar .header img { width: 45px; height: 45px; border-radius: 50%; }
+
+        /* Ocultar textos suavemente al colapsar */
+        .sidebar .info, .menu-item span, .toggle-sidebar span {
+            white-space: nowrap; overflow: hidden; opacity: 1; transition: opacity 0.2s ease, width 0.2s ease;
+        }
+        .sidebar.collapsed .info, .sidebar.collapsed .menu-item span, .sidebar.collapsed .toggle-sidebar span {
+            opacity: 0; width: 0; margin-left: 0;
+        }
+
+        .menu { display: flex; flex-direction: column; gap: 12px; padding: 10px 15px; }
+        .menu-item {
+            display: flex; align-items: center; gap: 15px; padding: 14px 18px;
+            cursor: pointer; border-radius: 10px; transition: var(--transition);
+            color: #aaa; text-decoration: none;
+        }
+        .menu-item:hover, .menu-item.active { background: rgba(3, 233, 244, 0.1); color: var(--primary); }
+        .bottom { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .toggle-sidebar { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 12px 15px; border-radius: 10px; color: #aaa; }
+
+        /* ================= MAIN CONTENT & SPA SECTIONS ================= */
+        .main-content { margin-left: 250px; padding: 40px; transition: margin-left 0.3s ease; position: relative; z-index: 1; min-height: 100vh; }
+        .sidebar.collapsed ~ .main-content { margin-left: 80px; }
+        .view-section { display: none; animation: fadeIn 0.4s; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Tarjetas Base y Formularios */
+        .glass-card { background: rgba(25, 25, 30, 0.7); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); border-radius: 15px; padding: 25px; margin-bottom: 20px; }
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; background: rgba(0,0,0,0.5); border: 1px solid #444; color: white; box-sizing: border-box;}
+
+        /* ================= ANIMACIONES DE TEXTO ================= */
+        .neon-text {
+            font-size: 3rem; color: #fff; margin-bottom: 30px; text-transform: uppercase; font-family: "Raleway", sans-serif;
+            text-shadow: 0 0 5px #ff005e, 0 0 10px #ff005e, 0 0 20px #ff005e, 0 0 40px #ff005e;
+            animation: glow 1.5s infinite alternate;
+        }
+        @keyframes glow {
+            0% { text-shadow: 0 0 5px #ff005e, 0 0 10px #ff005e, 0 0 20px #ff005e; }
+            100% { text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 40px #00d4ff; }
+        }
+
+        .typewriter-animation {
+            display: inline-block; position: relative; border-right: 2px solid rgba(255,255,255,.75);
+            font-size: 24px; white-space: nowrap; overflow: hidden; font-family: 'Anonymous Pro', monospace; color: #03e9f4;
+            animation: typewriter 3s steps(40) 1s 1 normal both, blinkingCursor 500ms steps(40) infinite normal;
+            margin-bottom: 20px;
+        }
+        @keyframes typewriter { from { width: 0; } to { width: 100%; } }
+        @keyframes blinkingCursor { from { border-right-color: rgba(255,255,255,.75); } to { border-right-color: transparent; } }
+
+        /* ================= BOTONES PERSONALIZADOS ================= */
+        /* Botón 1 - Glitch (Escanear) */
+        .btn-glitch {
+            padding: 1rem 2rem; font-size: 1rem; font-weight: 600; color: white; background: none; border: 2px solid #646cff; border-radius: 8px; cursor: pointer; transition: all 0.3s;
+            text-shadow: 0.05em 0 0 rgba(255,0,0,0.75), -0.025em -0.05em 0 rgba(0,255,0,0.75), 0.025em 0.05em 0 rgba(0,0,255,0.75);
+        }
+        .btn-glitch:hover { animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite; }
+        @keyframes glitch { 0%, 100% { transform: translate(0); } 20%, 60% { transform: translate(-4px, 4px); } 40%, 80% { transform: translate(4px, -4px); } }
+
+        /* Botón 2 - 3D Text (Inscribirse) */
+        .btn-3d { position: relative; width: 100%; height: 50px; display: block; transition: 1s; transform-style: preserve-3d; cursor: pointer; text-decoration: none; margin-top:15px; }
+        .btn-3d:hover { transform: perspective(1000px) rotateX(360deg); }
+        .btn-3d span { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #000; background: rgba(255, 255, 255, 0.9); font-weight: bold; text-transform: uppercase; border: 2px solid #000; box-sizing: border-box; transition: 0.5s; }
+        .btn-3d:hover span { color: #fff; background: rgba(3, 169, 244, 0.8); }
+        .btn-3d span:nth-child(1) { transform: rotateX(360deg) translateZ(25px); } .btn-3d span:nth-child(2) { transform: rotateX(270deg) translateZ(25px); } .btn-3d span:nth-child(3) { transform: rotateX(180deg) translateZ(25px); } .btn-3d span:nth-child(4) { transform: rotateX(90deg) translateZ(25px); }
+
+        /* Botón 3 - Neon Border (Crear Evento) */
+        .btn-neon { position: relative; display: inline-block; padding: 15px 30px; margin: 20px 0; color: #03e9f4; text-decoration: none; text-transform: uppercase; border: none; background: transparent; font-family: "Raleway", sans-serif; font-weight: bold; letter-spacing: 4px; overflow: hidden; cursor: pointer; transition: 0.5s; width: 100%; }
+        .btn-neon:hover { background: #03e9f4; color: #050801; box-shadow: 0 0 5px #03e9f4, 0 0 25px #03e9f4, 0 0 50px #03e9f4; }
+        .btn-neon span { position: absolute; display: block; }
+        .btn-neon span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #03e9f4); animation: btnAnim1 1s linear infinite; } @keyframes btnAnim1 { 50%, 100% { left: 100%; } }
+        .btn-neon span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, #03e9f4); animation: btnAnim2 1s linear infinite 0.25s; } @keyframes btnAnim2 { 50%, 100% { top: 100%; } }
+        .btn-neon span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, #03e9f4); animation: btnAnim3 1s linear infinite 0.5s; } @keyframes btnAnim3 { 50%, 100% { right: 100%; } }
+        .btn-neon span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, #03e9f4); animation: btnAnim4 1s linear infinite 0.75s; } @keyframes btnAnim4 { 50%, 100% { bottom: 100%; } }
+
+        /* Botón 4 - SVG Outline (Cancelar / Acciones) */
+        .btn-svg { background: none; border: none; display: block; position: relative; width: 200px; height: 50px; color: #98A5A6; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-svg:hover { color: #EBC445; transform: scale(1.05); }
+        .btn-svg-line { stroke-dasharray: 150 150; stroke-dashoffset: 0; fill: none; }
+        .btn-svg:hover .btn-svg-line--outer { animation: dash 2s linear infinite; }
+        .btn-svg-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-family: "Inter", sans-serif; font-weight: bold; }
+        @keyframes dash { to { stroke-dashoffset: 300; } }
+
+        /* ================= GRÁFICOS (ESTADÍSTICAS) ================= */
+        .stats-container { display: flex; flex-wrap: wrap; gap: 300px; justify-content: center; align-items: center;}
+
+        /* Gráfico 1: Radial Chart */
+        @property --v { syntax: '<integer>'; initial-value: 0; inherits: false; }
+        .chart-box { background: #201c29; border-radius: 15px; display: grid; place-content: center; width: 350px; height: 350px; box-shadow: .5rem .5rem 1rem rgba(0,0,0,0.6); }
+        .chart-box h3, .chart-box ul, .chart-box li { grid-area: 1/1; }
+        .chart-box h3 { place-self: center; display: grid; place-content: center; z-index: 1; width: 7em; height: 7em; border-radius: 50%; background: darkslategrey; color: gainsboro; box-shadow: inset 0 0 0 .75em rgba(50, 50, 50, .5); animation: disc 1s cubic-bezier(.35, 1.65, .65, 1) 1s both; }
+        @keyframes disc { 0% { transform: scale(0) } 90% { transform: scale(.9) } }
+        .chart-box ul { --m: calc(.5*(var(--n) - 1)); place-self: center; width: 0; list-style: none; margin: 0; padding: 0;}
+        .chart-box li {
+            --o0: calc((30 + var(--v))*1%); --o1: calc(var(--o0) - .5em); padding-left: 4em; width: 15em; transform-origin: 0; transform: rotate(calc((var(--i) - var(--m))*20deg));
+            text-transform: uppercase; clip-path: polygon(0 0, 0 100%, var(--o1) 100%, var(--o0) 50%, var(--o1) 0);
+            counter-reset: v var(--v); animation: v calc(var(--v)*.02s) linear 2s both;
+        }
+        .chart-box li::after { content: ' ' counter(v) '%' }
+        @keyframes v { 0% { --v: 0 } }
+
+        /* Gráfico 2: Weekly Report SVG */
+        .card-report { position: relative; height: 350px; width: 280px; background: #fff; border-radius: 5px; box-shadow: .5rem .5rem 1rem rgba(0,0,0,0.6); overflow: hidden; font-family: 'Zilla Slab', serif; color: #fff; }
+        .card-report .header { position: relative; height: 60px; width: 100%; background: #643a7a; }
+        .card-report .header .big { position: absolute; font-family: 'Satisfy', fantasy; font-size: 1.5rem; top: 12px; left: 15px; }
+        .card-report .header .date { position: absolute; font-size: 1rem; top: 2.5rem; left: 15px; }
+        .card-report .header .type { position: absolute; font-size: 1rem; top: 14px; right: 15px; }
+        .card-report .header .value { position: absolute; font-size: 1.5rem; top: 2rem; right: 15px; }
+        .card-report .parameter { text-align: right; padding: 10px 0 14px 0; background: #201c29;}
+        .card-report .parameter span { position: relative; font-size: .85rem; color: #a9a9a9; padding: 0 10px 0 25px; }
+        .card-report .parameter span:before { position: absolute; left: 6px; top: 6px; display: block; content: ''; width: 11px; height: 4px; border-radius: 3px; }
+        .card-report .parameter .red:before { background: #643a7a; }
+        .card-report .parameter .blue:before { background: #547496; }
+        .card-report .statistic { position: relative; height: 81px; width: 260px; margin: 0 auto; background: #201c29;}
+        .card-report .statistic .line { position: absolute; left: 0; right: 0; height: 2px; background: rgba(255, 192, 203, 0.1); }
+        .card-report .statistic .line-1 { top: 0; } .card-report .statistic .line-2 { top: 40px; } .card-report .statistic .line-3 { bottom: 0; }
+        .card-report .data svg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: 4s dash .5s linear forwards; }
+        .card-report .data polyline { fill: none; stroke-width: 2; stroke-linecap: round; }
+        .card-report .data.red polyline { stroke: #643a7a; } .card-report .data.blue polyline { stroke: #547496; }
+        .card-report .days { width: 280px; margin: 10px auto 0; background: #201c29; display: flex;}
+        .card-report .days .day { flex: 1; font-size: 9px; color: #949494; line-height: 30px; text-transform: uppercase; text-align: center; }
+
+        #reader { width: 100%; max-width: 500px; margin: 0 auto; background: black; }
+    </style>
+</head>
+ <script>
+     document.addEventListener("DOMContentLoaded", function() {
+
+         function aplicarEfectoATexto(nodo) {
+             // etiquetas que NO toca
+             const etiquetasProhibidas = ['SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'SVG', 'BUTTON', 'CANVAS'];
+
+             // clases de CSS que NO tocamos (aquí protego los botones y animaciones)
+             const clasesProhibidas = ['btn-3d', 'btn-neon', 'btn-glitch', 'btn-svg', 'typewriter-animation'];
+
+             // Si es un nodo de texto puro y no está vacío
+             if (nodo.nodeType === Node.TEXT_NODE) {
+                 const texto = nodo.nodeValue;
+                 if (texto.trim() !== '') {
+                     const fragmento = document.createDocumentFragment();
+                     const caracteres = texto.split('');
+
+                     caracteres.forEach(char => {
+                         if (char === ' ' || char === '\n' || char === '\t') {
+                             fragmento.appendChild(document.createTextNode(char));
+                         } else {
+                             const span = document.createElement('span');
+                             span.className = 'letra-magica';
+                             span.textContent = char;
+                             fragmento.appendChild(span);
+                         }
+                     });
+                     nodo.parentNode.replaceChild(fragmento, nodo);
+                 }
+             }
+             // Si es un contenedor normal
+             else if (nodo.nodeType === Node.ELEMENT_NODE) {
+                 // verificp si el elemento tiene alguna de las clases prohibidas
+                 let tieneClaseProhibida = false;
+                 if (nodo.classList) {
+                     clasesProhibidas.forEach(clase => {
+                         if (nodo.classList.contains(clase)) {
+                             tieneClaseProhibida = true;
+                         }
+                     });
+                 }
+
+                 // Si no es etiqueta prohibida y tampoco tiene una clase prohibida, entro
+                 if (!etiquetasProhibidas.includes(nodo.tagName.toUpperCase()) && !tieneClaseProhibida) {
+                     const hijos = Array.from(nodo.childNodes);
+                     hijos.forEach(hijo => aplicarEfectoATexto(hijo));
+                 }
+             }
+         }
+
+         // Disparo la función
+         const contenidoPrincipal = document.querySelector('body');
+         aplicarEfectoATexto(contenidoPrincipal);
+     });
+ </script>
+<body>
+/*cometa y luna y estrellas
+<div class="room-bg">
+    <div class="cometa"></div>
+</div>
+<div class="moon"></div>
+
+<nav class="sidebar" id="sidebar">
+    <div>
+        <div class="header">
+            <img src="https://ui-avatars.com/api/?name=Usuario+Actual&background=random" alt="User">
+            <div class="info">
+                <p class="typewriter-animation" style="font-size: 14px; color: white;" th:text="${session.usuario != null ? session.usuario.nombre : 'Estudiante'}">Estudiante</p><br>
+                <span class="typewriter-animation"   style="font-size: 14px; color: white;" th:text="${session.usuario != null ? session.usuario.rol : 'Participante'}">Participante</span>
+            </div>
+        </div>
+        <div class="menu">
+            <a href="#" class="menu-item active" onclick="switchView('eventos', this)"><i class="fas fa-calendar"></i><span>Eventos</span></a>
+            <a href="#" class="menu-item" onclick="switchView('mis-inscripciones', this)"><i class="fas fa-ticket-alt"></i><span>Mis Inscripciones</span></a>
+            <a href="#" class="menu-item" th:if="${session.usuario != null and (session.usuario.rol == 'Organizador' or session.usuario.rol == 'Administrador')}" onclick="switchView('crear-evento', this)"><i class="fas fa-plus"></i><span>Crear Evento</span></a>
+            <a href="#" class="menu-item" th:if="${session.usuario != null and (session.usuario.rol == 'Organizador' or session.usuario.rol == 'Administrador')}" onclick="switchView('stats', this)"><i class="fas fa-chart-line"></i><span>Estadísticas</span></a>
+            <a href="#" class="menu-item" th:if="${session.usuario != null and (session.usuario.rol == 'Organizador' or session.usuario.rol == 'Administrador')}" onclick="switchView('escaner', this)"><i class="fas fa-qrcode"></i><span>Escáner Asistencia</span></a>
+            <a href="#" class="menu-item" th:if="${session.usuario != null and session.usuario.rol == 'Administrador'}" onclick="switchView('admin', this)"><i class="fas fa-users-cog"></i><span>Panel Admin</span></a>
+        </div>
+    </div>
+    <div class="bottom">
+        <a href="/logout" class="menu-item" style="color: #e63946;"><i class="fas fa-sign-out-alt"></i><span>Salir</span></a>
+        <div class="toggle-sidebar" id="collapse-btn">
+            <i class="fas fa-angle-double-left" id="collapse-icon"></i><span>Colapsar</span>
+        </div>
+    </div>
+</nav>
+
+<main class="main-content">
+
+    <p class="typewriter-animation" style="font-size:20px">Conectado a Gestionando Eventos.</p>
+
+    <section id="view-eventos" class="view-section active">
+        <h1 class="neon-text">Eventos</h1>
+        <div class="grid-cards">
+            <div class="glass-card">
+                <h3>Congreso IA</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Auditorio Principal | <i class="fas fa-clock"></i> 10:00 AM</p>
+                <p>Cupos: 50</p>
+                <a href="#" class="btn-3d" onclick="registrarInscripcion(1)">
+                    <span>Inscribirse</span><span>Inscribirse</span><span>Inscribirse</span><span>Inscribirse</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-mis-inscripciones" class="view-section">
+        <h1 class="neon-text">Mis Tickets</h1>
+        <div class="grid-cards">
+            <div class="glass-card" style="text-align: center;">
+                <h3>Congreso IA</h3>
+                <div id="qr-container-1" style="background: white; padding: 10px; display: inline-block; margin: 15px 0;"></div>
+                <button class="btn-svg" onclick="cancelarInscripcion(1)" style="margin: 0 auto;">
+                    <svg class="btn-svg-line" width="200" height="50" viewBox="0 0 200 50" style="position:absolute; top:0; left:0;">
+                        <rect class="btn-svg-line--outer" stroke="#EBC445" stroke-width="4" x="2" y="2" width="196" height="46" rx="10" />
+                    </svg>
+                    <div class="btn-svg-content">Cancelar Reserva</div>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-crear-evento" class="view-section">
+        <h1 class="neon-text">Registrar Evento</h1>
+        <div class="glass-card" style="max-width: 600px;">
+            <form id="formCrear" onsubmit="enviarEvento(event)">
+                <label>Título del Evento:</label>
+                <input type="text" id="titulo" required>
+
+                <label>Lugar:</label>
+                <input type="text" id="lugar" required>
+
+                <label>Fecha y Hora:</label>
+                <input type="datetime-local" id="fecha" required>
+
+                <label>Cupo Máximo:</label>
+                <input type="number" id="cupo" min="1" required>
+
+                <button type="submit" class="btn-neon">
+                    <span></span><span></span><span></span><span></span> Guardar Evento
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <section id="view-stats" class="view-section">
+        <h1 class="neon-text">Métricas</h1>
+        <div class="stats-container">
+            <div class="chart-box">
+                <h3>Resumen</h3>
+                <ul style="--n: 3">
+                    <li style="--i: 0; --v: 65; background: #f2d786; color:black;">HTML</li>
+                    <li style="--i: 1; --v: 70; background: #ff9784; color:black;">CSS</li>
+                    <li style="--i: 2; --v: 25; background: #c09491; color:black;">JS</li>
+                </ul>
+            </div>
+
+            <div class="card-report">
+                <div class="header">
+                    <span class="title big">Reporte Semanal</span>
+                    <span class="date small">01. Feb - 07. Feb</span>
+                    <span class="type small">Revenue</span>
+                    <span class="value">3621.79</span>
+                </div>
+                <div style="clear: both;"></div>
+                <div style="background: #201c29; height:100%;">
+                    <div class="parameter">
+                        <span class="red">Vistas</span>
+                        <span class="blue">Inscritos</span>
+                    </div>
+                    <div class="statistic">
+                        <div class="line line-1"></div>
+                        <div class="line line-2"></div>
+                        <div class="line line-3"></div>
+                        <div class="data red">
+                            <svg><polyline points="9,46 50,12 90,23 130,11 171,38 211,48 251,19"></polyline></svg>
+                        </div>
+                        <div class="data blue">
+                            <svg><polyline points="9,61 50,50 90,65 130,55 171,61 211,74 251,64"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="days">
+                        <span class="day">Lun</span><span class="day">Mar</span><span class="day">Mie</span>
+                        <span class="day">Jue</span><span class="day">Vie</span><span class="day">Sab</span><span class="day">Dom</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="view-escaner" class="view-section">
+        <h1 class="neon-text">Validar Entrada</h1>
+        <div class="glass-card" style="text-align: center;">
+            <div id="reader"></div>
+            <button class="btn-glitch glitch" onclick="iniciarEscaner()" style="margin-top: 20px;">
+                <span>Activar Escáner</span>
+            </button>
+        </div>
+    </section>
+
+    <section id="view-admin" class="view-section">
+        <h1 class="neon-text">Admin</h1>
+        <div class="glass-card">
+            <p>Gestión de usuarios y eventos protegida por th:if.</p>
+        </div>
+    </section>
+
+</main>
+
+<script>
+    // --- Sidebar Logic ---
+    const sidebar = document.getElementById('sidebar');
+    const collapseBtn = document.getElementById('collapse-btn');
+    const collapseIcon = document.getElementById('collapse-icon');
+
+    collapseBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        collapseIcon.classList.toggle('fa-angle-double-left');
+        collapseIcon.classList.toggle('fa-angle-double-right');
+    });
+
+    // --- Navegación SPA Simulada ---
+    function switchView(viewId, element) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('view-' + viewId).classList.add('active');
+        if(element) element.classList.add('active');
+
+        if(viewId === 'mis-inscripciones') generarQR();
+    }
+
+    // --- Fetch API: Registro de Eventos (Validado) ---
+    async function enviarEvento(e) {
+        e.preventDefault();
+        const cupo = document.getElementById('cupo').value;
+        if (cupo <= 0) { alert("El cupo debe ser mayor a 0."); return; }
+
+        const payload = {
+            titulo: document.getElementById('titulo').value,
+            lugar: document.getElementById('lugar').value,
+            fecha: document.getElementById('fecha').value,
+            cupo: cupo
+        };
+
+        try {
+            const res = await fetch('/api/eventos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if(res.ok) { alert("Evento creado."); document.getElementById('formCrear').reset(); }
+        } catch (err) { console.error("Ruta no configurada", err); }
+    }
+
+    // --- Fetch API: Inscripciones ---
+    async function registrarInscripcion(idEvento) {
+        try {
+            const res = await fetch(`/api/inscripcion/${idEvento}`, { method: 'POST' });
+            alert("Procesando inscripción...");
+        } catch(e) {}
+    }
+    async function cancelarInscripcion(idEvento) {
+        try {
+            const res = await fetch(`/api/inscripcion/${idEvento}`, { method: 'DELETE' });
+            alert("Cancelando inscripción...");
+        } catch(e) {}
+    }
+
+    // --- Generación QR (Cliente) ---
+    function generarQR() {
+        const container = document.getElementById("qr-container-1");
+        container.innerHTML = "";
+        const qrData = JSON.stringify({ eventoId: 1, usuarioId: 123, token: "seguridad123" });
+        new QRCode(container, { text: qrData, width: 128, height: 128, colorDark: "#000", colorLight: "#fff" });
+    }
+
+    // --- Escáner QR (HTML5-QRCode) ---
+    function iniciarEscaner() {
+        const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+        html5QrcodeScanner.render(async (decodedText, decodedResult) => {
+            html5QrcodeScanner.clear();
+            alert(`QR Leído: ${decodedText}`);
+            // Fetch para marcar asistencia
+            try {
+                await fetch('/api/asistencia', {
+                    method: 'POST', headers:{'Content-Type':'application/json'}, body: decodedText
+                });
+            } catch(e) {}
+        }, (error) => { /* Ignorar errores de frame vacío */ });
+    }
+</script>
+</body>
+</html>
