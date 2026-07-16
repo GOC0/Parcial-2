@@ -43,7 +43,7 @@ public class UsuarioDB {
             em.close();
         }
     }
-    public static void actualizarUsuario(Usuario usuario) {
+    public static void actualizarU(Usuario usuario) {
         EntityManager em = Conexion.getEntityManager();
         try {
             em.getTransaction().begin();
