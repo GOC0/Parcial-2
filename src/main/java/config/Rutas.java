@@ -11,6 +11,7 @@ public class Rutas {
 
         routes.get("/", ctx -> {ctx.redirect("/login.html");});
         routes.get("/login", ctx -> {ctx.redirect("/login.html");});
+        routes.get("/dashboard", ctx -> {ctx.render("/Templates/dashboard.html");});
 
 
         //rutas post del login

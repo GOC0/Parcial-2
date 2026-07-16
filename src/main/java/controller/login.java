@@ -19,22 +19,22 @@ public class login {
             if (usuario.getPassword().equals(password)) {
 
                 ctx.sessionAttribute("usuario", usuario);
-                ctx.redirect("/dashboard.html");
+                ctx.redirect("/dashboard");
             }else{
                 ctx.status(400);
-                ctx.redirect("/login.html");
+                ctx.redirect("/login");
                 return;
             }
         }else{
             ctx.status(400);
-            ctx.redirect("/login.html");
+            ctx.redirect("/login");
             return;
         }
     }
 
     public static void CerrarSession(Context ctx) {
         ctx.req().getSession().invalidate();
-        ctx.redirect("/login.html");
+        ctx.redirect("/login");
     }
 
 
