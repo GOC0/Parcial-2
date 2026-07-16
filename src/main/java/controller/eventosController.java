@@ -83,4 +83,13 @@ public class eventosController {
         }
 
     }
+
+    public static void despublicarEventos(Context ctx){
+        String nombre= ctx.formParam("nombre");
+        Eventos ev = buscarEventos(nombre);
+        if(ev != null){
+            despublicarEv(ev.getId());
+            ctx.status(200);
+        }
+    }
 }

@@ -2,6 +2,7 @@ package config;
 
 
 import controller.eventosController;
+import controller.inscripcionesController;
 import controller.login;
 import io.javalin.config.RoutesConfig;
 
@@ -24,6 +25,10 @@ public class Rutas {
         routes.post("/crearEventos", eventosController::crearEventos);
         routes.post("/actualizarEventos", eventosController::actualizarEventos);
         routes.post("eliminarEventos", eventosController::EliminarEventos);
+
+        // rutas post para Inscripcion
+        routes.post("/inscribirse", inscripcionesController::crearInscripcion);
+        routes.post("/cancelarInscripcion", inscripcionesController::cancelarInscripcion);
 
 
     }

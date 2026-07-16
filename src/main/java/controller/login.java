@@ -19,6 +19,7 @@ public class login {
             if (usuario.getPassword().equals(password)) {
 
                 ctx.sessionAttribute("usuario", usuario);
+                ctx.sessionAttribute("rol", usuario.getRol().name());
                 ctx.redirect("/dashboard");
             }else{
                 ctx.status(400);

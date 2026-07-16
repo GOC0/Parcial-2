@@ -93,4 +93,31 @@ public static void actualizarEv(Eventos  eventos){
                 em.close();
             }
     }
+
+    public static void despublicarEv(int id) {
+        EntityManager em = Conexion.getEntityManager();
+
+        try {
+            em.getTransaction().begin();
+
+            Eventos evento = em.find(Eventos.class, id);
+
+            if (evento != null) {
+                evento.setPublicado(false);
+            }
+
+            em.getTransaction().commit();
+
+        } catch (Exception ex) {
+
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+
+            ex.printStackTrace();
+
+        } finally {
+            em.close();
+        }
+    }
 }

@@ -19,6 +19,7 @@ public class Eventos {
     private String lugar;
     private LocalDate fecha;
     private int numeroCupos;
+    private boolean publicado;
 
     public Eventos() {}
 
@@ -28,6 +29,15 @@ public class Eventos {
         this.lugar = lugar;
         this.fecha = fecha;
         this.numeroCupos = numeroCupos;
+        this.publicado = true;
+    }
+
+    public boolean isPublicado() {
+        return publicado;
+    }
+
+    public void setPublicado(boolean publicado) {
+        this.publicado = publicado;
     }
 
     public int getId() {

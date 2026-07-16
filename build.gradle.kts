@@ -37,6 +37,8 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.11")
 
     implementation ("com.auth0:java-jwt:4.5.2")
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("com.google.zxing:javase:3.5.3")
 }
 
 tasks.test {

@@ -359,17 +359,17 @@
         <div class="header">
             <img src="https://ui-avatars.com/api/?name=Usuario+Actual&background=random" alt="User">
             <div class="info">
-                <p class="typewriter-animation" style="font-size: 14px; color: white;" th:text="${session.usuario != null ? session.usuario.nombre : 'Estudiante'}">Estudiante</p><br>
-                <span class="typewriter-animation"   style="font-size: 14px; color: white;" th:text="${session.usuario != null ? session.usuario.rol : 'Participante'}">Participante</span>
+                <p class="typewriter-animation" style="font-size: 14px; color: white;" th:text="${session.usuario != null ? session.usuario.usuario : 'Estudiante'}">Estudiante</p><br>
+                <span class="typewriter-animation"   style="font-size: 14px; color: white;" th:text="${session.usuario != null ? session.rol : 'Participante'}">Participante</span>
             </div>
         </div>
         <div class="menu">
             <a href="#" class="menu-item active" onclick="switchView('eventos', this)"><i class="fas fa-calendar"></i><span>Eventos</span></a>
             <a href="#" class="menu-item" onclick="switchView('mis-inscripciones', this)"><i class="fas fa-ticket-alt"></i><span>Mis Inscripciones</span></a>
-            <a href="#" class="menu-item" th:if="${session.usuario != null and (session.usuario.rol == 'Organizador' or session.usuario.rol == 'Administrador')}" onclick="switchView('crear-evento', this)"><i class="fas fa-plus"></i><span>Crear Evento</span></a>
-            <a href="#" class="menu-item" th:if="${session.usuario != null and (session.usuario.rol == 'Organizador' or session.usuario.rol == 'Administrador')}" onclick="switchView('stats', this)"><i class="fas fa-chart-line"></i><span>Estadísticas</span></a>
-            <a href="#" class="menu-item" th:if="${session.usuario != null and (session.usuario.rol == 'Organizador' or session.usuario.rol == 'Administrador')}" onclick="switchView('escaner', this)"><i class="fas fa-qrcode"></i><span>Escáner Asistencia</span></a>
-            <a href="#" class="menu-item" th:if="${session.usuario != null and session.usuario.rol == 'Administrador'}" onclick="switchView('admin', this)"><i class="fas fa-users-cog"></i><span>Panel Admin</span></a>
+            <a href="#" class="menu-item" th:if="${session.usuario != null and (session.rol == 'Organizador' or session.rol == 'Administrador')}" onclick="switchView('crear-evento', this)"><i class="fas fa-plus"></i><span>Crear Evento</span></a>
+            <a href="#" class="menu-item" th:if="${session.usuario != null and (session.rol == 'Organizador' or session.rol == 'Administrador')}" onclick="switchView('stats', this)"><i class="fas fa-chart-line"></i><span>Estadísticas</span></a>
+            <a href="#" class="menu-item" th:if="${session.usuario != null and (session.rol == 'Organizador' or session.rol == 'Administrador')}" onclick="switchView('escaner', this)"><i class="fas fa-qrcode"></i><span>Escáner Asistencia</span></a>
+            <a href="#" class="menu-item" th:if="${session.usuario != null and session.rol == 'Administrador'}" onclick="switchView('admin', this)"><i class="fas fa-users-cog"></i><span>Panel Admin</span></a>
         </div>
     </div>
     <div class="bottom">
