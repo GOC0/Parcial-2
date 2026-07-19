@@ -388,23 +388,15 @@
         <h1 class="neon-text">Eventos</h1>
 
         <div class="grid-cards" id="lista-eventos">
-            <!-- Aquí JavaScript agregará los eventos -->
+
         </div>
     </section>
 
     <section id="view-mis-inscripciones" class="view-section">
         <h1 class="neon-text">Mis Tickets</h1>
-        <div class="grid-cards">
-            <div class="glass-card" style="text-align: center;">
-                <h3>Congreso IA</h3>
-                <div id="qr-container-1" style="background: white; padding: 10px; display: inline-block; margin: 15px 0;"></div>
-                <button class="btn-svg" onclick="cancelarInscripcion(1)" style="margin: 0 auto;">
-                    <svg class="btn-svg-line" width="200" height="50" viewBox="0 0 200 50" style="position:absolute; top:0; left:0;">
-                        <rect class="btn-svg-line--outer" stroke="#EBC445" stroke-width="4" x="2" y="2" width="196" height="46" rx="10" />
-                    </svg>
-                    <div class="btn-svg-content">Cancelar Reserva</div>
-                </button>
-            </div>
+
+        <div class="grid-cards" id="lista-inscripciones">
+
         </div>
     </section>
 
@@ -531,6 +523,74 @@
         cargarEventos();
     });
 
+    // --- para inscripciones ---
+    async function cargarInscripciones() {
+    try {
+        const res = await fetch("/api/inscripciones", { credentials: "include" });
+        if (!res.ok) return;
+
+        const lista = await res.json();
+        const contenedor = document.getElementById("lista-inscripciones");
+        contenedor.innerHTML = "";
+
+        if (lista.length === 0) {
+            contenedor.innerHTML = "<p>No tienes inscripciones aún.</p>";
+            return;
+        }
+
+        lista.forEach(inscripcion => {
+            contenedor.innerHTML += `
+                <div class="glass-card" style="text-align:center">
+                    <h3>${inscripcion.titulo}</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> ${inscripcion.lugar}</p>
+                    <p><i class="fas fa-calendar"></i> ${inscripcion.fecha}</p>
+                    <img src="data:image/png;base64,${inscripcion.qr}" width="180">
+                    <button class="btn-svg" onclick="cancelarInscripcion(${inscripcion.eventoId})">
+                        <div class="btn-svg-content">Cancelar Reserva</div>
+                    </button>
+                </div>
+            `;
+        });
+
+    } catch (e) {
+        console.error(e);
+    }
+}
+// --- cancelar ---
+async function cancelarInscripcion(idEvento) {
+
+    try {
+
+        const res = await fetch(`/api/inscripcion/${idEvento}`, {
+            method: "DELETE"
+        });
+
+        const mensaje = await res.text();
+
+        if (res.ok) {
+
+            alert(mensaje);
+
+            // Recargar la lista de inscripciones
+            cargarInscripciones();
+
+            // Actualizar los cupos de los eventos
+            cargarEventos();
+
+        } else {
+
+            alert("Error: " + mensaje);
+
+        }
+
+    } catch (e) {
+
+        console.error(e);
+
+    }
+}
+
+
         // --- Sidebar Logic ---
         const sidebar = document.getElementById('sidebar');
         const collapseBtn = document.getElementById('collapse-btn');
@@ -549,7 +609,9 @@
             document.getElementById('view-' + viewId).classList.add('active');
             if(element) element.classList.add('active');
 
-            if(viewId === 'mis-inscripciones') generarQR();
+            if (viewId === "mis-inscripciones") {
+        cargarInscripciones();
+    }
         }
 
         // --- Fetch API: Registro de Eventos (Validado) ---
@@ -577,11 +639,25 @@
 
         // --- Fetch API: Inscripciones ---
         async function registrarInscripcion(idEvento) {
-            try {
-                const res = await fetch(`/api/inscripcion/${idEvento}`, { method: 'POST' });
-                alert("Procesando inscripción...");
-            } catch(e) {}
+
+    try {
+
+        const res = await fetch(`/api/inscripcion/${idEvento}`, {
+            method: "POST"
+        });
+
+        const mensaje = await res.text();
+
+        if (res.ok) {
+            alert(mensaje);
+        } else {
+            alert("Error: " + mensaje);
         }
+
+    } catch (e) {
+        console.error(e);
+    }
+}
         async function cancelarInscripcion(idEvento) {
             try {
                 const res = await fetch(`/api/inscripcion/${idEvento}`, { method: 'DELETE' });

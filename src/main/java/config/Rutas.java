@@ -14,6 +14,7 @@ public class Rutas {
         routes.get("/login", ctx -> {ctx.redirect("/login.html");});
         routes.get("/dashboard", ctx -> {ctx.render("/Templates/dashboard.html");});
         routes.get("/api/eventos", eventosController::listarEventos);
+        routes.get("/api/inscripciones", inscripcionesController::listarInscripciones);
 
         //rutas post del login
         routes.post("/login", login::loginController);

@@ -5,9 +5,10 @@ import logic.Eventos;
 import logic.Inscripciones;
 import logic.Usuario;
 import logic.codigoQR;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.*;
 
 import static Database.eventosDB.*;
 import static Database.inscripcionesDB.*;
@@ -16,6 +17,9 @@ public class inscripcionesController {
 
     //para inscribirse. le falta la redirecion
     public static void crearInscripcion(Context ctx) {
+
+        System.out.println("Entró al controlador");
+        System.out.println("ID Evento: " + ctx.pathParam("idEvento"));
 
         Usuario usuario = ctx.sessionAttribute("usuario");
 
@@ -98,11 +102,12 @@ public class inscripcionesController {
 
         try {
 
-            Eventos evento = inscripcion.getEvento();
+
+            Eventos evento = buscarEvento(idEvento);
 
             evento.setCupo(evento.getCupo() + 1);
-
             actualizarEv(evento);
+
             eliminarInscripcion(inscripcion.getId());
 
             ctx.status(200).result("Inscripción cancelada correctamente");
@@ -119,5 +124,36 @@ public class inscripcionesController {
     }
 
 
+    public static void listarInscripciones(@NotNull Context ctx) {
 
+        Usuario usuario = ctx.sessionAttribute("usuario");
+
+        if (usuario == null) {
+            ctx.status(401).result("Debe iniciar sesión");
+            return;
+        }
+
+        List<Inscripciones> lista =
+                obtenerInscripcionesParaUsuario(usuario.getId());
+
+        List<Map<String, Object>> respuesta = new ArrayList<>();
+
+        for (Inscripciones i : lista) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("id", i.getId());
+            item.put("eventoId", i.getEvento().getId());
+            item.put("titulo", i.getEvento().getTitulo());
+            item.put("lugar", i.getEvento().getLugar());
+            item.put("fecha", i.getEvento().getFecha());
+
+            String qrBase64 = i.getQrCode() != null
+                    ? Base64.getEncoder().encodeToString(i.getQrCode())
+                    : "";
+            item.put("qr", qrBase64);
+
+            respuesta.add(item);
+        }
+
+        ctx.json(respuesta);
     }
+}

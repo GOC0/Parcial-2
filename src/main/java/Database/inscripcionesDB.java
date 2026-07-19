@@ -76,11 +76,15 @@ public class inscripcionesDB {
     }
     //para obterner la lista de inscripciones de un usuario
     public static List<Inscripciones> obtenerInscripcionesParaUsuario(int idUsuario) {
+
         EntityManager em = Conexion.getEntityManager();
 
         try {
+
             return em.createQuery(
-                            "SELECT i FROM Inscripciones i WHERE i.usuario.id = :idUsuario",
+                            "SELECT i FROM Inscripciones i " +
+                                    "JOIN FETCH i.evento " +
+                                    "WHERE i.usuario.id = :idUsuario",
                             Inscripciones.class
                     )
                     .setParameter("idUsuario", idUsuario)
@@ -90,6 +94,7 @@ public class inscripcionesDB {
             em.close();
         }
     }
+
 
 
     // busca el numero total de inscrito en un evento tomando el id del evento
