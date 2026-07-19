@@ -1,6 +1,7 @@
 package config;
 
 
+import controller.asistenciaController;
 import controller.eventosController;
 import controller.inscripcionesController;
 import controller.login;
@@ -30,7 +31,7 @@ public class Rutas {
 
         routes.post("/api/inscripcion/{idEvento}", inscripcionesController::crearInscripcion);
         routes.delete("/api/inscripcion/{idEvento}", inscripcionesController::cancelarInscripcion);
-
+        routes.post("/api/asistencia", asistenciaController::marcarAsistencia);
     }
 
 

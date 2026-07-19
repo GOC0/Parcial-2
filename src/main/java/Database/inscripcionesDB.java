@@ -1,6 +1,7 @@
 package Database;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 import logic.Inscripciones;
 import logic.Usuario;
 
@@ -149,5 +150,38 @@ public class inscripcionesDB {
         double porcentaje = (double) asistentes * 100 / inscritos;
 
         return Math.round(porcentaje * 100.0) / 100.0;
+    }
+
+    public static Inscripciones buscarPorToken(String token) {
+        EntityManager em = Conexion.getEntityManager();
+        try {
+            List<Inscripciones> resultado = em.createQuery(
+                    "SELECT i FROM Inscripciones i " +
+                            "JOIN FETCH i.evento " +
+                            "WHERE i.tokenValidacion = :token",
+                    Inscripciones.class
+            ).setParameter("token", token).getResultList();
+
+            return resultado.isEmpty() ? null : resultado.get(0);
+        } finally {
+            em.close();
+        }
+    }
+
+    public static void marcarComoAsistio(int idInscripcion) {
+        EntityManager em = Conexion.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            Inscripciones inscripcion = em.find(Inscripciones.class, idInscripcion);
+            inscripcion.setAsistencia(true);
+            em.merge(inscripcion);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 }
