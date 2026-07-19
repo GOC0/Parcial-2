@@ -72,6 +72,9 @@ public class inscripcionesController {
 
     }
 
+    public static void marcarAsistencia(int id) {
+
+    }
 
 
 

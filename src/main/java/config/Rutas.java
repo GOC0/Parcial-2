@@ -24,7 +24,9 @@ public class Rutas {
         // rutas post para eventos
         routes.post("/crearEventos", eventosController::crearEventos);
         routes.post("/actualizarEventos", eventosController::actualizarEventos);
-        routes.post("eliminarEventos", eventosController::EliminarEventos);
+        routes.post("/eliminarEventos", eventosController::EliminarEventos);
+        routes.post("/despublicarEventos", eventosController::despublicarEventos);
+
 
         // rutas post para Inscripcion
         routes.post("/inscribirse", inscripcionesController::crearInscripcion);
