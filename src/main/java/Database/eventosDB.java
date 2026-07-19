@@ -79,9 +79,9 @@ public static void actualizarEv(Eventos  eventos){
         em.getTransaction().begin();
 
         try {
-            Eventos eventos = em.find(Eventos.class, nombre);
+            Eventos eventos = buscarEventos(nombre);
             if (eventos != null) {
-                em.remove(eventos);
+                em.remove(em.merge(eventos));
                 em.getTransaction().commit();
             }
         }catch (Exception e) {

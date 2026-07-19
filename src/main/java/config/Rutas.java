@@ -4,6 +4,7 @@ package config;
 import controller.eventosController;
 import controller.inscripcionesController;
 import controller.login;
+import controller.usuarioController;
 import io.javalin.config.RoutesConfig;
 
 public class Rutas {
@@ -19,12 +20,15 @@ public class Rutas {
         routes.post("/login", login::loginController);
         routes.post("/cerrarSession",login::CerrarSession);
 
-
+        //rutas para usuario
+        routes.post("/crearUsuario", usuarioController::crearUsuario);
+        routes.post("/actualizarUsuario", usuarioController::actualizarUsuario);
+        routes.post("/eliminarUsuario", usuarioController::eliminarUsuario);
 
         // rutas post para eventos
         routes.post("/crearEventos", eventosController::crearEventos);
         routes.post("/actualizarEventos", eventosController::actualizarEventos);
-        routes.post("eliminarEventos", eventosController::EliminarEventos);
+        routes.post("/eliminarEventos", eventosController::EliminarEventos);
 
         // rutas post para Inscripcion
         routes.post("/inscribirse", inscripcionesController::crearInscripcion);

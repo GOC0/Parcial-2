@@ -14,6 +14,17 @@ application{
     mainClass.set("Main")
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.jar {
+    manifest {
+        attributes("Main-Class" to "Main")
+    }
+}
+
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -32,6 +43,7 @@ dependencies {
     implementation("io.javalin:javalin-rendering-thymeleaf:7.2.2")
 
     implementation ("org.hibernate.orm:hibernate-core:7.4.0.Final")
+    implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
 
     implementation("com.h2database:h2:2.4.240")
     implementation("org.postgresql:postgresql:42.7.11")

@@ -9,7 +9,6 @@ import static Database.eventosDB.*;
 
 public class eventosController {
 
-    //eso es para crear eventos. me falto poner la redirecion a la pagina
     public static void crearEventos(Context ctx){
         String nombre = ctx.formParam("nombre");
         String descripcion = ctx.formParam("descripcion");
@@ -32,12 +31,13 @@ public class eventosController {
             Eventos eventos = new Eventos(nombre, descripcion, lugar, fecha, cupos);
             guardarEv(eventos);
             ctx.status(201).result("Evento creado correctamente");
+            ctx.redirect("/dashboard");
         } catch (Exception e) {
             ctx.status(500).result("Error al crear el evento");
         }
 
     }
-    //eso es para actualizar eventos. me falto poner la redirecion a la pagina
+
     public static void actualizarEventos(Context ctx){
         String nombre = ctx.formParam("nombre");
         String descripcion = ctx.formParam("descripcion");
@@ -60,6 +60,7 @@ public class eventosController {
             Eventos evento = new Eventos(nombre, descripcion, lugar, fecha, cupos);
             actualizarEv(evento);
             ctx.status(201).result("Evento actualizado correctamente");
+            ctx.redirect("/dashboard");
         } catch (Exception e) {
             ctx.status(500).result("Error al actualizar el evento");
         }
@@ -67,7 +68,6 @@ public class eventosController {
     }
 
 
-    //eso es para elimar eventos. me falto poner la redirecion a la pagina
     public static void EliminarEventos(Context ctx){
         String nombre = ctx.formParam("nombre");
 
@@ -76,6 +76,7 @@ public class eventosController {
         if(ev != null){
             eliminarEv(nombre);
             ctx.status(200);
+            ctx.redirect("/dashboard");
 
         }else{
             ctx.status(404).result("No se encontro el evento");
@@ -90,6 +91,7 @@ public class eventosController {
         if(ev != null){
             despublicarEv(ev.getId());
             ctx.status(200);
+            ctx.redirect("/dashboard");
         }
     }
 }

@@ -24,7 +24,20 @@ public class UsuarioDB {
     }
 
     public static void eliminarU (Usuario usuario){
-
+        EntityManager em = Conexion.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            Usuario merged = em.merge(usuario);
+            em.remove(merged);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException(e);
+        } finally {
+            em.close();
+        }
     }
 
     public static Usuario buscarUsuario(String usuario) {

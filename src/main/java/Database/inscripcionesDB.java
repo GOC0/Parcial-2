@@ -54,8 +54,8 @@ public class inscripcionesDB {
         EntityManager em = Conexion.getEntityManager();
 
         try {
-            return em.createNamedQuery(
-                    "inscripciones.findAll",
+            return em.createQuery(
+                    "SELECT i FROM Inscripciones i",
                     Inscripciones.class
             ).getResultList();
 
