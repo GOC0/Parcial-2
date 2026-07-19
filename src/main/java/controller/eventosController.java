@@ -3,93 +3,121 @@ package controller;
 
 import io.javalin.http.Context;
 import logic.Eventos;
-import java.time.LocalDate;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 import static Database.eventosDB.*;
 
 public class eventosController {
 
     //eso es para crear eventos. me falto poner la redirecion a la pagina
-    public static void crearEventos(Context ctx){
-        String nombre = ctx.formParam("nombre");
-        String descripcion = ctx.formParam("descripcion");
-        String lugar = ctx.formParam("lugar");
-        String fechaStr = ctx.formParam("fecha");
-        String cuposStr = ctx.formParam("cupos");
+    public static void crearEventos(Context ctx) {
 
-        if (nombre == null || nombre.isBlank()
-                || descripcion == null || descripcion.isBlank()
-                || lugar == null || lugar.isBlank()
-                || fechaStr == null || fechaStr.isBlank()
-                || cuposStr == null || cuposStr.isBlank()) {
-            ctx.status(400).result("El registro no puede estar vacío");
-            return;
-        }
         try {
-            LocalDate fecha = LocalDate.parse(fechaStr);
-            int cupos = Integer.parseInt(cuposStr);
 
-            Eventos eventos = new Eventos(nombre, descripcion, lugar, fecha, cupos);
-            guardarEv(eventos);
-            ctx.status(201).result("Evento creado correctamente");
-        } catch (Exception e) {
-            ctx.status(500).result("Error al crear el evento");
-        }
+            Eventos dto = ctx.bodyAsClass(Eventos.class);
 
-    }
-    //eso es para actualizar eventos. me falto poner la redirecion a la pagina
-    public static void actualizarEventos(Context ctx){
-        String nombre = ctx.formParam("nombre");
-        String descripcion = ctx.formParam("descripcion");
-        String lugar = ctx.formParam("lugar");
-        String fechaStr = ctx.formParam("fecha");
-        String cuposStr = ctx.formParam("cupos");
+            if (dto.getTitulo() == null || dto.getTitulo().isBlank()
+                    || dto.getLugar() == null || dto.getLugar().isBlank()
+                    || dto.getFecha() == null
+                    || dto.getCupo() <= 0) {
 
-            if (nombre == null || nombre.isBlank()
-                    || descripcion == null || descripcion.isBlank()
-                    || lugar == null || lugar.isBlank()
-                    || fechaStr == null || fechaStr.isBlank()
-                    || cuposStr == null || cuposStr.isBlank()) {
-                ctx.status(400).result("El registro no puede estar vacío");
+                ctx.status(400).result("Datos inválidos");
                 return;
             }
-        try {
-            LocalDate fecha = LocalDate.parse(fechaStr);
-            int cupos = Integer.parseInt(cuposStr);
 
-            Eventos evento = new Eventos(nombre, descripcion, lugar, fecha, cupos);
-            actualizarEv(evento);
-            ctx.status(201).result("Evento actualizado correctamente");
+            Eventos evento = new Eventos(
+                    dto.getTitulo(),
+                    dto.getDescripcion(),
+                    dto.getLugar(),
+                    dto.getFecha(),
+                    dto.getCupo()
+            );
+
+
+            guardarEv(evento);
+
+            ctx.status(201).result("Evento creado correctamente");
+
         } catch (Exception e) {
+            e.printStackTrace();
+            ctx.status(500).result("Error al crear el evento");
+        }
+    }
+
+
+    //eso es para actualizar eventos. me falto poner la redirecion a la pagina
+    public static void actualizarEventos(Context ctx) {
+
+        try {
+
+            Eventos dto = ctx.bodyAsClass(Eventos.class);
+
+            if (dto.getTitulo() == null || dto.getTitulo().isBlank()
+                    || dto.getLugar() == null || dto.getLugar().isBlank()
+                    || dto.getFecha() == null
+                    || dto.getCupo() <= 0) {
+
+                ctx.status(400).result("Datos inválidos");
+                return;
+            }
+
+            Eventos evento = new Eventos(
+                    dto.getTitulo(),
+                    dto.getDescripcion(),
+                    dto.getLugar(),
+                    dto.getFecha(),
+                    dto.getCupo()
+            );
+
+            actualizarEv(evento);
+
+            ctx.status(200).result("Evento actualizado correctamente");
+
+        } catch (Exception e) {
+            e.printStackTrace();
             ctx.status(500).result("Error al actualizar el evento");
         }
-
     }
 
 
     //eso es para elimar eventos. me falto poner la redirecion a la pagina
-    public static void EliminarEventos(Context ctx){
-        String nombre = ctx.formParam("nombre");
+    public static void EliminarEventos(Context ctx) {
 
-        Eventos ev = buscarEventos(nombre);
+        int id = Integer.parseInt(ctx.pathParam("id"));
 
-        if(ev != null){
-            eliminarEv(nombre);
-            ctx.status(200);
+        Eventos evento = buscarEvento(id);
 
-        }else{
-            ctx.status(404).result("No se encontro el evento");
+        if (evento == null) {
+            ctx.status(404).result("No se encontró el evento");
             return;
         }
 
+        eliminarEv(id);
+
+        ctx.status(200).result("Evento eliminado correctamente");
     }
 
-    public static void despublicarEventos(Context ctx){
-        String nombre= ctx.formParam("nombre");
-        Eventos ev = buscarEventos(nombre);
-        if(ev != null){
-            despublicarEv(ev.getId());
-            ctx.status(200);
+    public static void despublicarEventos(Context ctx) {
+
+        int id = Integer.parseInt(ctx.pathParam("id"));
+
+        Eventos evento = buscarEvento(id);
+
+        if (evento == null) {
+            ctx.status(404).result("Evento no encontrado");
+            return;
         }
+
+        despublicarEv(id);
+
+        ctx.status(200).result("Evento despublicado correctamente");
+    }
+
+    public static void listarEventos(Context ctx) {
+        List<Eventos> eventos = obtenerEventos();
+
+        ctx.json(eventos);
     }
 }

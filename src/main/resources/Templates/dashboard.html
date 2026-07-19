@@ -386,15 +386,9 @@
 
     <section id="view-eventos" class="view-section active">
         <h1 class="neon-text">Eventos</h1>
-        <div class="grid-cards">/*/
-            <div class="glass-card">
-                <h3>Congreso IA</h3>
-                <p><i class="fas fa-map-marker-alt"></i> Auditorio Principal | <i class="fas fa-clock"></i> 10:00 AM</p>
-                <p>Cupos: 50</p>
-                <a href="#" class="btn-3d" onclick="registrarInscripcion(1)">
-                    <span>Inscribirse</span><span>Inscribirse</span><span>Inscribirse</span><span>Inscribirse</span>
-                </a>
-            </div>
+
+        <div class="grid-cards" id="lista-eventos">
+            <!-- Aquí JavaScript agregará los eventos -->
         </div>
     </section>
 
@@ -502,86 +496,121 @@
 </main>
 
 <script>
-    // --- Sidebar Logic ---
-    const sidebar = document.getElementById('sidebar');
-    const collapseBtn = document.getElementById('collapse-btn');
-    const collapseIcon = document.getElementById('collapse-icon');
 
-    collapseBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        collapseIcon.classList.toggle('fa-angle-double-left');
-        collapseIcon.classList.toggle('fa-angle-double-right');
+    async function cargarEventos() {
+
+        try {
+            const res = await fetch("/api/eventos");
+            if (!res.ok) return;
+
+            const eventos = await res.json();
+            const contenedor = document.getElementById("lista-eventos");
+            contenedor.innerHTML = "";
+
+            eventos.forEach(evento => {
+                contenedor.innerHTML += `
+                    <div class="glass-card">
+                        <h3>${evento.titulo}</h3>
+                        <p><i class="fas fa-map-marker-alt"></i> ${evento.lugar}</p>
+                        <p><i class="fas fa-calendar"></i> ${evento.fecha}</p>
+                        <p>Cupos: ${evento.cupo}</p>
+                        <a href="#" class="btn-3d" onclick="registrarInscripcion(${evento.id})">
+                            <span>Inscribirse</span><span>Inscribirse</span>
+                            <span>Inscribirse</span><span>Inscribirse</span>
+                        </a>
+                    </div>
+                `;
+            });
+
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        cargarEventos();
     });
 
-    // --- Navegación SPA Simulada ---
-    function switchView(viewId, element) {
-        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-        document.getElementById('view-' + viewId).classList.add('active');
-        if(element) element.classList.add('active');
+        // --- Sidebar Logic ---
+        const sidebar = document.getElementById('sidebar');
+        const collapseBtn = document.getElementById('collapse-btn');
+        const collapseIcon = document.getElementById('collapse-icon');
 
-        if(viewId === 'mis-inscripciones') generarQR();
-    }
+        collapseBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            collapseIcon.classList.toggle('fa-angle-double-left');
+            collapseIcon.classList.toggle('fa-angle-double-right');
+        });
 
-    // --- Fetch API: Registro de Eventos (Validado) ---
-    async function enviarEvento(e) {
-        e.preventDefault();
-        const cupo = document.getElementById('cupo').value;
-        if (cupo <= 0) { alert("El cupo debe ser mayor a 0."); return; }
+        // --- Navegación SPA Simulada ---
+        function switchView(viewId, element) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            if(element) element.classList.add('active');
 
-        const payload = {
-            titulo: document.getElementById('titulo').value,
-            lugar: document.getElementById('lugar').value,
-            fecha: document.getElementById('fecha').value,
-            cupo: cupo
-        };
+            if(viewId === 'mis-inscripciones') generarQR();
+        }
 
-        try {
-            const res = await fetch('/api/eventos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if(res.ok) { alert("Evento creado."); document.getElementById('formCrear').reset(); }
-        } catch (err) { console.error("Ruta no configurada", err); }
-    }
+        // --- Fetch API: Registro de Eventos (Validado) ---
+        async function enviarEvento(e) {
+            e.preventDefault();
+            const cupo = document.getElementById('cupo').value;
+            if (cupo <= 0) { alert("El cupo debe ser mayor a 0."); return; }
 
-    // --- Fetch API: Inscripciones ---
-    async function registrarInscripcion(idEvento) {
-        try {
-            const res = await fetch(`/api/inscripcion/${idEvento}`, { method: 'POST' });
-            alert("Procesando inscripción...");
-        } catch(e) {}
-    }
-    async function cancelarInscripcion(idEvento) {
-        try {
-            const res = await fetch(`/api/inscripcion/${idEvento}`, { method: 'DELETE' });
-            alert("Cancelando inscripción...");
-        } catch(e) {}
-    }
+            const payload = {
+                titulo: document.getElementById('titulo').value,
+                lugar: document.getElementById('lugar').value,
+                fecha: document.getElementById('fecha').value,
+                cupo: cupo
+            };
 
-    // --- Generación QR (Cliente) ---
-    function generarQR() {
-        const container = document.getElementById("qr-container-1");
-        container.innerHTML = "";
-        const qrData = JSON.stringify({ eventoId: 1, usuarioId: 123, token: "seguridad123" });
-        new QRCode(container, { text: qrData, width: 128, height: 128, colorDark: "#000", colorLight: "#fff" });
-    }
-
-    // --- Escáner QR (HTML5-QRCode) ---
-    function iniciarEscaner() {
-        const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-        html5QrcodeScanner.render(async (decodedText, decodedResult) => {
-            html5QrcodeScanner.clear();
-            alert(`QR Leído: ${decodedText}`);
-            // Fetch para marcar asistencia
             try {
-                await fetch('/api/asistencia', {
-                    method: 'POST', headers:{'Content-Type':'application/json'}, body: decodedText
+                const res = await fetch('/api/eventos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
+                if(res.ok) { alert("Evento creado."); document.getElementById('formCrear').reset(); }
+            } catch (err) { console.error("Ruta no configurada", err); }
+        }
+
+        // --- Fetch API: Inscripciones ---
+        async function registrarInscripcion(idEvento) {
+            try {
+                const res = await fetch(`/api/inscripcion/${idEvento}`, { method: 'POST' });
+                alert("Procesando inscripción...");
             } catch(e) {}
-        }, (error) => { /* Ignorar errores de frame vacío */ });
-    }
+        }
+        async function cancelarInscripcion(idEvento) {
+            try {
+                const res = await fetch(`/api/inscripcion/${idEvento}`, { method: 'DELETE' });
+                alert("Cancelando inscripción...");
+            } catch(e) {}
+        }
+
+        // --- Generación QR (Cliente) ---
+        function generarQR() {
+            const container = document.getElementById("qr-container-1");
+            container.innerHTML = "";
+            const qrData = JSON.stringify({ eventoId: 1, usuarioId: 123, token: "seguridad123" });
+            new QRCode(container, { text: qrData, width: 128, height: 128, colorDark: "#000", colorLight: "#fff" });
+        }
+
+        // --- Escáner QR (HTML5-QRCode) ---
+        function iniciarEscaner() {
+            const html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+            html5QrcodeScanner.render(async (decodedText, decodedResult) => {
+                html5QrcodeScanner.clear();
+                alert(`QR Leído: ${decodedText}`);
+                // Fetch para marcar asistencia
+                try {
+                    await fetch('/api/asistencia', {
+                        method: 'POST', headers:{'Content-Type':'application/json'}, body: decodedText
+                    });
+                } catch(e) {}
+            }, (error) => { /* Ignorar errores de frame vacío */ });
+        }
 </script>
 </body>
 </html>

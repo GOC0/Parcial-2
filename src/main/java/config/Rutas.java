@@ -13,7 +13,7 @@ public class Rutas {
         routes.get("/", ctx -> {ctx.redirect("/login.html");});
         routes.get("/login", ctx -> {ctx.redirect("/login.html");});
         routes.get("/dashboard", ctx -> {ctx.render("/Templates/dashboard.html");});
-
+        routes.get("/api/eventos", eventosController::listarEventos);
 
         //rutas post del login
         routes.post("/login", login::loginController);
@@ -21,17 +21,14 @@ public class Rutas {
 
 
 
-        // rutas post para eventos
-        routes.post("/crearEventos", eventosController::crearEventos);
-        routes.post("/actualizarEventos", eventosController::actualizarEventos);
-        routes.post("/eliminarEventos", eventosController::EliminarEventos);
-        routes.post("/despublicarEventos", eventosController::despublicarEventos);
 
+        routes.post("/api/eventos", eventosController::crearEventos);
+        routes.put("/api/eventos/{id}", eventosController::actualizarEventos);
+        routes.delete("/api/eventos/{id}", eventosController::EliminarEventos);
+        routes.patch("/api/eventos/{id}/despublicar", eventosController::despublicarEventos);
 
-        // rutas post para Inscripcion
-        routes.post("/inscribirse", inscripcionesController::crearInscripcion);
-        routes.post("/cancelarInscripcion", inscripcionesController::cancelarInscripcion);
-
+        routes.post("/api/inscripcion/{idEvento}", inscripcionesController::crearInscripcion);
+        routes.delete("/api/inscripcion/{idEvento}", inscripcionesController::cancelarInscripcion);
 
     }
 

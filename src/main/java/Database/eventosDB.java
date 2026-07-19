@@ -21,6 +21,16 @@ public class eventosDB {
     }
 
 
+    //para buscar eventos por id
+    public static Eventos buscarEvento(int idEvento) {
+        EntityManager em = Conexion.getEntityManager();
+
+        try {
+            return em.find(Eventos.class, idEvento);
+        } finally {
+            em.close();
+        }
+    }
 
     //para buscar un evento
     public static Eventos  buscarEventos(String nombre){
@@ -42,16 +52,14 @@ public class eventosDB {
 
 
     //para buscar la lista de todos los eventos
-    public List<Eventos> buscarTodoslosEventos() {
-
+    public static List<Eventos> obtenerEventos() {
         EntityManager em = Conexion.getEntityManager();
 
         try {
             return em.createQuery(
-                    "SELECT DISTINCT e FROM Eventos",
+                    "SELECT e FROM Eventos e WHERE e.publicado = true",
                     Eventos.class
             ).getResultList();
-
         } finally {
             em.close();
         }
@@ -74,24 +82,31 @@ public static void actualizarEv(Eventos  eventos){
 }
 
     //para eliminar eventos
-    public static void eliminarEv(String nombre){
-        EntityManager em= Conexion.getEntityManager();
-        em.getTransaction().begin();
+    public static void eliminarEv(int id) {
+        EntityManager em = Conexion.getEntityManager();
 
         try {
-            Eventos eventos = em.find(Eventos.class, nombre);
-            if (eventos != null) {
-                em.remove(eventos);
-                em.getTransaction().commit();
+            em.getTransaction().begin();
+
+            Eventos evento = em.find(Eventos.class, id);
+
+            if (evento != null) {
+                em.remove(evento);
             }
-        }catch (Exception e) {
-                if (em.getTransaction().isActive()) {
-                    em.getTransaction().rollback();
-                }
-                e.printStackTrace();
-            } finally {
-                em.close();
+
+            em.getTransaction().commit();
+
+        } catch (Exception ex) {
+
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
             }
+
+            ex.printStackTrace();
+
+        } finally {
+            em.close();
+        }
     }
 
     public static void despublicarEv(int id) {

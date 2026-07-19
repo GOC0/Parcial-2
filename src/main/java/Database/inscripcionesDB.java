@@ -51,20 +51,29 @@ public class inscripcionesDB {
         }
     }
 
-    public static List<Inscripciones> obtenerInscripciones() {
+    public static Inscripciones obtenerInscripcion(int idUsuario, int idEvento) {
         EntityManager em = Conexion.getEntityManager();
 
         try {
-            return em.createNamedQuery(
-                    "inscripciones.findAll",
-                    Inscripciones.class
-            ).getResultList();
+            return em.createQuery(
+                            """
+                            SELECT i
+                            FROM Inscripciones i
+                            WHERE i.usuario.id = :idUsuario
+                            AND i.evento.id = :idEvento
+                            """,
+                            Inscripciones.class
+                    )
+                    .setParameter("idUsuario", idUsuario)
+                    .setParameter("idEvento", idEvento)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
 
         } finally {
             em.close();
         }
     }
-
     //para obterner la lista de inscripciones de un usuario
     public static List<Inscripciones> obtenerInscripcionesParaUsuario(int idUsuario) {
         EntityManager em = Conexion.getEntityManager();
