@@ -1,6 +1,7 @@
 package logic;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ public class Inscripciones {
     @JoinColumn(name = "evento_id", nullable = false)
     private Eventos evento;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
@@ -32,7 +34,9 @@ public class Inscripciones {
     @Column(name = "fecha_inscripcion")
     private LocalDateTime fechaInscripcion;
 
-    // getters, setters, constructores
+    @Column(name = "asistencia")
+    private boolean asistencia;
+
     public Inscripciones() {}
     public Inscripciones(Eventos evento, Usuario usuario, String tokenValidacion, byte[] qrCode, LocalDateTime fechaInscripcion) {
         this.evento = evento;
@@ -40,6 +44,7 @@ public class Inscripciones {
         this.tokenValidacion = tokenValidacion;
         this.qrCode = qrCode;
         this.fechaInscripcion = fechaInscripcion;
+        this.asistencia = false;
     }
 
     public int getId() {
@@ -88,5 +93,13 @@ public class Inscripciones {
 
     public void setFechaInscripcion(LocalDateTime fechaInscripcion) {
         this.fechaInscripcion = fechaInscripcion;
+    }
+
+    public boolean isAsistencia() {
+        return asistencia;
+    }
+
+    public void setAsistencia(boolean asistencia) {
+        this.asistencia = asistencia;
     }
 }

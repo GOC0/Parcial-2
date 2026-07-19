@@ -39,6 +39,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:2.21.1")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.15.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0")
 
     implementation("io.javalin:javalin-rendering-thymeleaf:7.2.2")
 

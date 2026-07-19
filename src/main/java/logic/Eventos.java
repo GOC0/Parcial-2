@@ -2,8 +2,7 @@ package logic;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="eventos")
@@ -14,21 +13,21 @@ public class Eventos {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private String nombre;
+    private String Titulo;
     private String descripcion;
     private String lugar;
-    private LocalDate fecha;
-    private int numeroCupos;
+    private LocalDateTime fecha;
+    private int cupo;
     private boolean publicado;
 
     public Eventos() {}
 
-    public Eventos(String nombre, String descripcion, String lugar, LocalDate fecha, int numeroCupos) {
-        this.nombre = nombre;
+    public Eventos(String nombre, String descripcion, String lugar, LocalDateTime fecha, int numeroCupos) {
+        this.Titulo = nombre;
         this.descripcion = descripcion;
         this.lugar = lugar;
         this.fecha = fecha;
-        this.numeroCupos = numeroCupos;
+        this.cupo = numeroCupos;
         this.publicado = true;
     }
 
@@ -48,12 +47,12 @@ public class Eventos {
         this.id = id;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getTitulo() {
+        return Titulo;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setTitulo(String titulo) {
+        Titulo = titulo;
     }
 
     public String getDescripcion() {
@@ -72,19 +71,19 @@ public class Eventos {
         this.lugar = lugar;
     }
 
-    public LocalDate getFecha() {
+    public LocalDateTime getFecha() {
         return fecha;
     }
 
-    public void setFecha(LocalDate fecha) {
+    public void setFecha(LocalDateTime fecha) {
         this.fecha = fecha;
     }
 
-    public int getNumeroCupos() {
-        return numeroCupos;
+    public int getCupo() {
+        return cupo;
     }
 
-    public void setNumeroCupos(int numeroCupos) {
-        this.numeroCupos = numeroCupos;
+    public void setCupo(int cupo) {
+        this.cupo = cupo;
     }
 }
