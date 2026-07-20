@@ -13,6 +13,7 @@ public class Usuario {
     String usuario;
     String password;
     Rol rol;
+    boolean bloqueado;
 
     public Usuario() {}
 
@@ -20,12 +21,22 @@ public class Usuario {
         this.usuario = nombre;
         this.password = password;
         this.rol = rol;
+        this.bloqueado = false;
     }
 
     public Usuario(String nombre, String password) {
         this.usuario = nombre;
         this.password = password;
         this.rol = Rol.Participante;
+        this.bloqueado = false;
+    }
+
+    public boolean isBloqueado() {
+        return bloqueado;
+    }
+
+    public void setBloqueado(boolean bloqueado) {
+        this.bloqueado = bloqueado;
     }
 
     public int getId() {

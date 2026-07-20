@@ -1,10 +1,7 @@
 package config;
 
 
-import controller.asistenciaController;
-import controller.eventosController;
-import controller.inscripcionesController;
-import controller.login;
+import controller.*;
 import io.javalin.config.RoutesConfig;
 
 public class Rutas {
@@ -21,8 +18,15 @@ public class Rutas {
                 ctx.render("/Templates/dashboard.html");
             }
         });
+        routes.get("/api/eventos/todos", eventosController::listarTodosLosEventos);
+        routes.get("/api/eventos/{id}/resumen", eventosController::obtenerResumen);
         routes.get("/api/eventos", eventosController::listarEventos);
         routes.get("/api/inscripciones", inscripcionesController::listarInscripciones);
+        routes.get("/api/usuarios", usuarioController::listarUsuarios);
+        routes.post("/api/usuarios/rol", usuarioController::cambiarRol);
+        routes.patch("/api/usuarios/{id}/bloquear", usuarioController::bloquearUsuario);
+        routes.patch("/api/usuarios/{id}/desbloquear", usuarioController::desbloquearUsuario);
+
 
         // rutas post del login
         routes.post("/login", login::loginController);
@@ -34,6 +38,7 @@ public class Rutas {
         routes.post("/api/eventos", eventosController::crearEventos);
         routes.put("/api/eventos/{id}", eventosController::actualizarEventos);
         routes.delete("/api/eventos/{id}", eventosController::EliminarEventos);
+        routes.patch("/api/eventos/{id}/publicar", eventosController::publicarEvento);
         routes.patch("/api/eventos/{id}/despublicar", eventosController::despublicarEventos);
 
         routes.post("/api/inscripcion/{idEvento}", inscripcionesController::crearInscripcion);

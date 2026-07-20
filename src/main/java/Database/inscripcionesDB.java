@@ -116,7 +116,7 @@ public class inscripcionesDB {
     }
 
     //busca el total de asistente de para un evento tomando el id del evento
-    public static long totalAsistentes(int idEvento) {
+    public static long totalAsistencia(int idEvento) {
         EntityManager em = Conexion.getEntityManager();
 
         try {
@@ -141,7 +141,7 @@ public class inscripcionesDB {
     public static double porcentajeAsistencia(int idEvento) {
 
         long inscritos = totalInscritos(idEvento);
-        long asistentes = totalAsistentes(idEvento);
+        long asistentes = totalAsistencia(idEvento);
 
         if (inscritos == 0) {
             return 0;

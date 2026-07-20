@@ -2,6 +2,7 @@ package Database;
 
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 import logic.Eventos;
 
 import java.util.List;
@@ -31,25 +32,17 @@ public class eventosDB {
             em.close();
         }
     }
-
-    // pa buscar un evento por nombre
-    public static Eventos  buscarEventos(String nombre){
-            EntityManager em = Conexion.getEntityManager();
-            try {
-                List<Eventos> resultados = em.createQuery(
-                                "SELECT e FROM Eventos e WHERE e.nombre = :nombre",
-                                Eventos.class)
-                        .setParameter("nombre", nombre)
-                        .setMaxResults(1)
-                        .getResultList();
-
-                return resultados.isEmpty() ? null : resultados.get(0);
-
-            } finally {
-                em.close();
-            }
+    public static List<Eventos> obtenerTodosLosE() {
+        EntityManager em = Conexion.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT e FROM Eventos e ORDER BY e.fecha DESC",
+                    Eventos.class
+            ).getResultList();
+        } finally {
+            em.close();
+        }
     }
-
 
     // pa la lista de todos los eventos publicados
     public static List<Eventos> obtenerEventos() {
@@ -115,6 +108,42 @@ public static void actualizarEv(Eventos  eventos){
 
         } finally {
             em.close();
+        }
+    }
+
+    public static void publicarEv(int idEvento) {
+
+        EntityManager em = Conexion.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+
+            tx.begin();
+
+            Eventos evento = em.find(Eventos.class, idEvento);
+
+            if (evento == null) {
+                return;
+            }
+
+            evento.setPublicado(true);
+
+            em.merge(evento);
+
+            tx.commit();
+
+        } catch (Exception e) {
+
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+
+            throw e;
+
+        } finally {
+
+            em.close();
+
         }
     }
 

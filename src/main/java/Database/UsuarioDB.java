@@ -1,6 +1,7 @@
 package Database;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 import logic.Usuario;
 
 import java.util.List;
@@ -56,6 +57,16 @@ public class UsuarioDB {
             em.close();
         }
     }
+
+    public static Usuario buscarUsuarioPorId(int id) {
+        EntityManager em = Conexion.getEntityManager();
+
+        try {
+            return em.find(Usuario.class, id);
+        } finally {
+            em.close();
+        }
+    }
     public static void actualizarU(Usuario usuario) {
         EntityManager em = Conexion.getEntityManager();
         try {
@@ -69,6 +80,94 @@ public class UsuarioDB {
             throw new RuntimeException(e);
         } finally {
             em.close();
+        }
+    }
+
+    public static List<Usuario> obtenerTodosLosUsuarios() {
+        EntityManager em = Conexion.getEntityManager();
+        try{
+            return em.createQuery(
+                    "SELECT u FROM Usuario u ORDER BY u.usuario",
+                    Usuario.class
+            ).getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public static Usuario bloquearU(int id) {
+
+        EntityManager em = Conexion.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+
+            tx.begin();
+
+            Usuario usuario = em.find(Usuario.class, id);
+
+            if (usuario == null) {
+                return null;
+            }
+
+            usuario.setBloqueado(true);
+
+            em.merge(usuario);
+
+            tx.commit();
+
+            return usuario;
+
+        } catch (Exception e) {
+
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+
+            throw e;
+
+        } finally {
+
+            em.close();
+
+        }
+    }
+
+    public static Usuario desbloquearU(int id) {
+
+        EntityManager em = Conexion.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+
+            tx.begin();
+
+            Usuario usuario = em.find(Usuario.class, id);
+
+            if (usuario == null) {
+                return null;
+            }
+
+            usuario.setBloqueado(false);
+
+            em.merge(usuario);
+
+            tx.commit();
+
+            return usuario;
+
+        } catch (Exception e) {
+
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+
+            throw e;
+
+        } finally {
+
+            em.close();
+
         }
     }
 }
