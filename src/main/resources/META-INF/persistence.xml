@@ -4,7 +4,7 @@
         <class>logic.Usuario</class>
         <class>logic.Eventos</class>
         <class>logic.Inscripciones</class>
-        <class>logic.codigoQR</class>
+        <!-- quite logic.codigoQR de aqui, esa clase no es una entidad -->
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:~/parcial;AUTO_SERVER=TRUE"/>

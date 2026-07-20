@@ -13,11 +13,18 @@ public class Rutas {
 
         routes.get("/", ctx -> {ctx.redirect("/login.html");});
         routes.get("/login", ctx -> {ctx.redirect("/login.html");});
-        routes.get("/dashboard", ctx -> {ctx.render("/Templates/dashboard.html");});
+        // esto lo agregue yo: antes se podia entrar a /dashboard sin login
+        routes.get("/dashboard", ctx -> {
+            if (ctx.sessionAttribute("usuario") == null) {
+                ctx.redirect("/login.html");
+            } else {
+                ctx.render("/Templates/dashboard.html");
+            }
+        });
         routes.get("/api/eventos", eventosController::listarEventos);
         routes.get("/api/inscripciones", inscripcionesController::listarInscripciones);
 
-        //rutas post del login
+        // rutas post del login
         routes.post("/login", login::loginController);
         routes.post("/cerrarSession",login::CerrarSession);
 

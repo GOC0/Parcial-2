@@ -15,7 +15,7 @@ import static Database.inscripcionesDB.*;
 
 public class inscripcionesController {
 
-    //para inscribirse. le falta la redirecion
+    // pa inscribirse
     public static void crearInscripcion(Context ctx) {
 
         System.out.println("Entró al controlador");
@@ -37,7 +37,7 @@ public class inscripcionesController {
             return;
         }
 
-        // Verificar inscripción existente
+        // verifico que no este ya inscrito
         if (obtenerInscripcion(usuario.getId(), idEvento) != null) {
             ctx.status(409).result("Ya estás inscrito en este evento");
             return;
@@ -81,7 +81,7 @@ public class inscripcionesController {
         }
     }
 
-    //para cancelarInscripcion. le falta la redirecion
+    // pa cancelar inscripcion
     public static void cancelarInscripcion(Context ctx) {
 
         Usuario usuario = ctx.sessionAttribute("usuario");
@@ -104,6 +104,12 @@ public class inscripcionesController {
 
 
             Eventos evento = buscarEvento(idEvento);
+
+            // esto lo agregue yo, antes no validaba: solo se puede cancelar antes de la fecha del evento (requisito 4c del pdf)
+            if (evento.getFecha() != null && !LocalDateTime.now().isBefore(evento.getFecha())) {
+                ctx.status(400).result("No se puede cancelar: el evento ya inició o pasó");
+                return;
+            }
 
             evento.setCupo(evento.getCupo() + 1);
             actualizarEv(evento);
@@ -145,6 +151,8 @@ public class inscripcionesController {
             item.put("titulo", i.getEvento().getTitulo());
             item.put("lugar", i.getEvento().getLugar());
             item.put("fecha", i.getEvento().getFecha());
+            // esto lo agregue yo, antes no lo mandaba y el front no podia pintar el badge de "asistio"
+            item.put("asistencia", i.isAsistencia());
 
             String qrBase64 = i.getQrCode() != null
                     ? Base64.getEncoder().encodeToString(i.getQrCode())

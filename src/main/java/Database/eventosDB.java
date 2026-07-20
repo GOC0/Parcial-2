@@ -8,7 +8,7 @@ import java.util.List;
 
 public class eventosDB {
 
-    //para guardar eventos
+    // pa guardar eventos
     public static  void guardarEv(Eventos  eventos){
         EntityManager em = Conexion.getEntityManager();
         try {
@@ -21,7 +21,7 @@ public class eventosDB {
     }
 
 
-    //para buscar eventos por id
+    // pa buscar eventos por id
     public static Eventos buscarEvento(int idEvento) {
         EntityManager em = Conexion.getEntityManager();
 
@@ -32,7 +32,7 @@ public class eventosDB {
         }
     }
 
-    //para buscar un evento
+    // pa buscar un evento por nombre
     public static Eventos  buscarEventos(String nombre){
             EntityManager em = Conexion.getEntityManager();
             try {
@@ -51,7 +51,7 @@ public class eventosDB {
     }
 
 
-    //para buscar la lista de todos los eventos
+    // pa la lista de todos los eventos publicados
     public static List<Eventos> obtenerEventos() {
         EntityManager em = Conexion.getEntityManager();
 
@@ -81,12 +81,19 @@ public static void actualizarEv(Eventos  eventos){
         }
 }
 
-    //para eliminar eventos
+    // pa eliminar eventos
     public static void eliminarEv(int id) {
         EntityManager em = Conexion.getEntityManager();
 
         try {
             em.getTransaction().begin();
+
+            // esto lo agregue yo: si el evento tenia gente inscrita, la FK evento_id
+            // no dejaba borrarlo y quedaba en silencio como que si se habia borrado
+            // (el catch se tragaba el error). por eso primero borro sus inscripciones
+            em.createQuery("DELETE FROM Inscripciones i WHERE i.evento.id = :id")
+                    .setParameter("id", id)
+                    .executeUpdate();
 
             Eventos evento = em.find(Eventos.class, id);
 
@@ -102,7 +109,9 @@ public static void actualizarEv(Eventos  eventos){
                 em.getTransaction().rollback();
             }
 
-            ex.printStackTrace();
+            // esto tambien lo agregue: relanzo el error pa que el controlador no
+            // responda "eliminado correctamente" cuando en verdad fallo
+            throw new RuntimeException(ex);
 
         } finally {
             em.close();

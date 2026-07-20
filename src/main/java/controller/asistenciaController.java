@@ -3,6 +3,7 @@ package controller;
 import io.javalin.http.Context;
 import logic.AsistenciaRequest;
 import logic.Inscripciones;
+import logic.Rol;
 import logic.Usuario;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +21,9 @@ public class asistenciaController {
             return;
         }
 
-        if (!usuario.getRol().equals("Organizador")) {
+        // esto lo arregle: comparabas el rol (que es un enum) contra un String y eso
+        // siempre daba false, por eso el escaner tiraba 403 siempre
+        if (usuario.getRol() != Rol.Organizador && usuario.getRol() != Rol.Administrador) {
             ctx.status(403).result("No tiene permisos para validar entradas");
             return;
         }
