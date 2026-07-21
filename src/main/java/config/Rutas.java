@@ -23,7 +23,7 @@ public class Rutas {
         routes.get("/api/eventos", eventosController::listarEventos);
         routes.get("/api/inscripciones", inscripcionesController::listarInscripciones);
         routes.get("/api/usuarios", usuarioController::listarUsuarios);
-        routes.post("/api/usuarios/rol", usuarioController::cambiarRol);
+        routes.post("/api/usuarios/rol", usuarioController::actualizarUsuario);
         routes.patch("/api/usuarios/{id}/bloquear", usuarioController::bloquearUsuario);
         routes.patch("/api/usuarios/{id}/desbloquear", usuarioController::desbloquearUsuario);
 
@@ -31,6 +31,7 @@ public class Rutas {
         // rutas post del login
         routes.post("/login", login::loginController);
         routes.post("/cerrarSession",login::CerrarSession);
+        routes.post("/registro", usuarioController::crearUsuario);
 
 
 

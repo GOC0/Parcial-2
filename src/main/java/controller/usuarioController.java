@@ -35,12 +35,12 @@ public class usuarioController {
     public static void actualizarUsuario(Context ctx) {
         String usuario = ctx.formParam("usuario");
         String rolParam = ctx.formParam("rol");
+        System.out.println("rolParam = '" + rolParam + "'");
 
         if (rolParam == null) {
             ctx.status(400).result("rol es requerido");
             return;
         }
-        rolParam = rolParam.trim();
 
         if (rolParam.equals(Rol.Administrador.name())) {
             ctx.status(409).result("no se puede editar");
@@ -65,10 +65,11 @@ public class usuarioController {
             default:
                 ctx.status(400).result("rol invalido");
                 return;
+
+
         }
 
         ctx.status(200).result("usuario actualizado");
-        ctx.redirect("/dashboard");
     }
 
     public static void eliminarUsuario(Context ctx){
