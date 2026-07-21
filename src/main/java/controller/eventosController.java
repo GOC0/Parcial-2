@@ -7,12 +7,15 @@ import logic.Rol;
 import logic.Usuario;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static Database.eventosDB.*;
+import static Database.inscripcionesDB.datosParaResumen;
 import static Database.inscripcionesDB.totalAsistencia;
 import static Database.inscripcionesDB.totalInscritos;
 
@@ -181,17 +184,59 @@ public class eventosController {
             int totalInscritos = (int) totalInscritos(idEvento);
             int totalAsistencias = (int) totalAsistencia(idEvento);
 
+            // esto es pa los 2 graficos del dashboard, cuento las inscripciones por dia
+            // y las asistencias por hora aqui mismo
+            Map<String, Integer> porDia = new TreeMap<>();
+            Map<Integer, Integer> porHora = new TreeMap<>();
+
+            for (Object[] fila : datosParaResumen(idEvento)) {
+                LocalDateTime fecha = (LocalDateTime) fila[0];
+                boolean asistio = Boolean.TRUE.equals(fila[1]);
+
+                if (fecha == null) continue;
+
+                String dia = fecha.toLocalDate().toString();
+                porDia.merge(dia, 1, Integer::sum);
+
+                if (asistio) {
+                    porHora.merge(fecha.getHour(), 1, Integer::sum);
+                }
+            }
+
+            List<Map<String, Object>> inscripcionesPorDia = new ArrayList<>();
+            for (Map.Entry<String, Integer> e : porDia.entrySet()) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("dia", e.getKey());
+                item.put("total", e.getValue());
+                inscripcionesPorDia.add(item);
+            }
+
+            List<Map<String, Object>> asistenciaPorHora = new ArrayList<>();
+            for (Map.Entry<Integer, Integer> e : porHora.entrySet()) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("hora", e.getKey());
+                item.put("total", e.getValue());
+                asistenciaPorHora.add(item);
+            }
+
+            double porcentaje = totalInscritos == 0
+                    ? 0
+                    : Math.round((totalAsistencias * 100.0 / totalInscritos) * 100.0) / 100.0;
+
             Map<String, Object> resumen = new HashMap<>();
             resumen.put("eventoId", evento.getId());
             resumen.put("titulo", evento.getTitulo());
             resumen.put("lugar", evento.getLugar());
             resumen.put("fecha", evento.getFecha());
             resumen.put("cuposTotales", evento.getCupo());
-            resumen.put("inscritos", totalInscritos);
-            resumen.put("asistencias", totalAsistencias);
             resumen.put("cuposDisponibles", evento.getCupo() - totalInscritos);
-            resumen.put("porcentajeAsistencia",
-                    totalInscritos == 0 ? 0 : (totalAsistencias * 100.0 / totalInscritos));
+            // esto lo cambie: el dashboard lee totalInscritos y totalAsistentes,
+            // yo se los mandaba como inscritos y asistencias y por eso salia todo en 0
+            resumen.put("totalInscritos", totalInscritos);
+            resumen.put("totalAsistentes", totalAsistencias);
+            resumen.put("porcentajeAsistencia", porcentaje);
+            resumen.put("inscripcionesPorDia", inscripcionesPorDia);
+            resumen.put("asistenciaPorHora", asistenciaPorHora);
 
             ctx.json(resumen);
 
@@ -250,7 +295,8 @@ public class eventosController {
             return;
         }
 
-        if (usuarioSesion.getRol() != Rol.Administrador || usuarioSesion.getRol() != Rol.Organizador) {
+        // esto lo arregle: estaba con || y eso siempre daba true, asi ni el admin podia publicar
+        if (usuarioSesion.getRol() != Rol.Administrador && usuarioSesion.getRol() != Rol.Organizador) {
             ctx.status(403).result("No tiene permisos para esta acción");
             return;
         }

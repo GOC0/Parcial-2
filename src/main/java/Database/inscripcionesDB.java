@@ -152,6 +152,29 @@ public class inscripcionesDB {
         return Math.round(porcentaje * 100.0) / 100.0;
     }
 
+    // esto es pa sacar la fecha y si asistio de cada inscripcion del evento,
+    // el conteo por dia y por hora lo hago alla en el controlador
+    public static List<Object[]> datosParaResumen(int idEvento) {
+        EntityManager em = Conexion.getEntityManager();
+
+        try {
+            return em.createQuery(
+                            """
+                            SELECT i.fechaInscripcion, i.asistencia
+                            FROM Inscripciones i
+                            WHERE i.evento.id = :idEvento
+                            ORDER BY i.fechaInscripcion
+                            """,
+                            Object[].class
+                    )
+                    .setParameter("idEvento", idEvento)
+                    .getResultList();
+
+        } finally {
+            em.close();
+        }
+    }
+
     public static Inscripciones buscarPorToken(String token) {
         EntityManager em = Conexion.getEntityManager();
         try {

@@ -1212,7 +1212,7 @@
 
                 const btnBloquear = esElAdmin
                     ? ''
-                    : `<button class="btn-mini ${bloqueado ? 'publicar' : 'eliminar'}" onclick="bloquearUsuario(${u.id})">
+                    : `<button class="btn-mini ${bloqueado ? 'publicar' : 'eliminar'}" onclick="bloquearUsuario(${u.id}, ${bloqueado})">
                            <i class="fas ${bloqueado ? 'fa-unlock' : 'fa-ban'}"></i> ${bloqueado ? 'Desbloquear' : 'Bloquear'}
                        </button>`;
 
@@ -1258,12 +1258,16 @@
         }
     }
 
-    async function bloquearUsuario(idUsuario) {
+    // esto lo arregle: el boton decia Desbloquear pero igual llamaba a /bloquear
+    // y el backend tiraba 409, ahora si ya esta bloqueado le pega a /desbloquear
+    async function bloquearUsuario(idUsuario, estaBloqueado) {
+        const accion = estaBloqueado ? 'desbloquear' : 'bloquear';
+
         try {
-            const res = await fetch(`/api/usuarios/${idUsuario}/bloquear`, { method: 'PATCH' });
+            const res = await fetch(`/api/usuarios/${idUsuario}/${accion}`, { method: 'PATCH' });
 
             if (res.status === 404) {
-                toast('Falta el endpoint PATCH /api/usuarios/{id}/bloquear en el backend.', 'fallo');
+                toast(`Falta el endpoint PATCH /api/usuarios/{id}/${accion} en el backend.`, 'fallo');
                 return;
             }
 
